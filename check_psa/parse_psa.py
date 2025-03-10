@@ -1349,16 +1349,6 @@ class PSAFixture(PSAItem):
 
         return PSAFixtureType.OBSTRUCTION
 
-    def to_box(self) -> Box:
-        return Box(
-            x=self.x,
-            y=self.y,
-            z=self.z,
-            width=self.width,
-            height=self.height,
-            depth=self.depth,
-        )
-
 
 class PSAFixtureType(enum.IntEnum):
     REGULAR = 0
