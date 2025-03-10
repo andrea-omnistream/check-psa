@@ -122,38 +122,6 @@ class PsaParser:
         self.bay_height = 0
         self.psa_planogram = PSAPlanogram()
 
-    def get_product(self, item_id: str) -> PSAProduct:
-        for product in self.products:
-            if product.upc == item_id:
-                return product
-
-        raise ValueError(f"Product not found {item_id}")
-
-    def get_segment_index(self, psa_fixture_x: float) -> int:
-        back_ordered_bays = [*enumerate(sorted(self.bays, key=lambda b: b["bay_x"]))][
-            ::-1
-        ]
-        for index, bay in back_ordered_bays:
-            if bay["bay_x"] <= psa_fixture_x:
-                return index + 1
-
-        return 1
-
-    def get_notch_no(self, psa_fixture: PSAFixture) -> int:
-        if psa_fixture.shelf_type == PSAFixtureType.OBSTRUCTION:
-            if not self.fixtures:
-                return 0
-            return self.fixtures[-1]["notch_no"]
-
-        shelf_y = psa_fixture.y * UNIT_CONVERTER
-        shelf_height = psa_fixture.height * UNIT_CONVERTER
-        notch_offset = self.psa_planogram.notch_offset * UNIT_CONVERTER
-        notch_spacing = self.psa_planogram.notch_spacing * UNIT_CONVERTER
-
-        notch_no = int((shelf_y + shelf_height - notch_offset) / notch_spacing) + 1
-        return max(notch_no, 0)
-
-    def decode_psa(self, product_master={}) -> t.Dict:
         segment_id = 0
         fixture_id = 0
 
@@ -247,6 +215,39 @@ class PsaParser:
                 self.position_items.append((psa_position, self.fixtures[-1]))
 
         self.fixtures.sort(key=lambda e: (e["shelf_x"], -e["shelf_y"]))
+
+    def get_product(self, item_id: str) -> PSAProduct:
+        for product in self.products:
+            if product.upc == item_id:
+                return product
+
+        raise ValueError(f"Product not found {item_id}")
+
+    def get_segment_index(self, psa_fixture_x: float) -> int:
+        back_ordered_bays = [*enumerate(sorted(self.bays, key=lambda b: b["bay_x"]))][
+            ::-1
+        ]
+        for index, bay in back_ordered_bays:
+            if bay["bay_x"] <= psa_fixture_x:
+                return index + 1
+
+        return 1
+
+    def get_notch_no(self, psa_fixture: PSAFixture) -> int:
+        if psa_fixture.shelf_type == PSAFixtureType.OBSTRUCTION:
+            if not self.fixtures:
+                return 0
+            return self.fixtures[-1]["notch_no"]
+
+        shelf_y = psa_fixture.y * UNIT_CONVERTER
+        shelf_height = psa_fixture.height * UNIT_CONVERTER
+        notch_offset = self.psa_planogram.notch_offset * UNIT_CONVERTER
+        notch_spacing = self.psa_planogram.notch_spacing * UNIT_CONVERTER
+
+        notch_no = int((shelf_y + shelf_height - notch_offset) / notch_spacing) + 1
+        return max(notch_no, 0)
+
+    def decode_psa(self, product_master={}) -> t.Dict:
         for psa_position, fixture_data in self.position_items:
             product = self.get_product(psa_position.upc)
             prod_x = float(psa_position.x) * UNIT_CONVERTER
