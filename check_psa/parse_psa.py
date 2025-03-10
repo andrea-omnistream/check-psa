@@ -1534,8 +1534,6 @@ def value_to_csv(value: t.Any) -> str:
 class Box:
     """A box in 3D space"""
 
-    _R = t.TypeVar("_R", bound="Box")
-
     x: float
     y: float
     z: float
