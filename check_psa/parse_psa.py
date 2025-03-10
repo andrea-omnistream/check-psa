@@ -5,7 +5,6 @@ from abc import ABC
 import csv
 from dataclasses import asdict, dataclass, fields
 import enum
-from io import StringIO
 import typing as t
 from uuid import uuid4
 
@@ -129,8 +128,20 @@ class PsaParser:
         notch_offset = 0.0
         notch_width = 0.0
 
-        psa_file_manager = PSAFileManager()
-        lines = psa_file_manager.iterate_lines(self.psa_content)
+        lines = (
+            row
+            for row in csv.reader(
+                (
+                    line.replace("\\r\\n", "<newline>")
+                    for line in psa_content.splitlines()
+                ),
+                delimiter=",",
+                escapechar="\\",
+                quoting=csv.QUOTE_NONE,
+                lineterminator="\r\n",
+            )
+            if len(row) > 1
+        )
         for items in lines:
             if items[0] == "Planogram":
                 self.psa_planogram = PSAPlanogram.from_array(items)
@@ -1359,40 +1370,6 @@ class PSAFixtureType(enum.IntEnum):
     PEGBOARD = 7
     OBSTRUCTION = 10
     TEXTBOX = 13
-
-
-class PSAFileManager:
-    LINETERMINATOR = "\r\n"
-
-    REPLACEMENTS = [
-        ("\\r\\n", "<newline>"),
-    ]
-
-    def _replace(self, content: str) -> str:
-        for src, dst in self.REPLACEMENTS:
-            content = content.replace(src, dst)
-
-        return content
-
-    def _replace_revert(self, content: str) -> str:
-        for src, dst in self.REPLACEMENTS:
-            content = content.replace(dst, src)
-
-        return content
-
-    def iterate_lines(self, content: str) -> t.Iterator[t.List[t.Any]]:
-        stream = StringIO(self._replace(content))
-        reader = csv.reader(
-            stream,
-            delimiter=",",
-            escapechar="\\",
-            quoting=csv.QUOTE_NONE,
-            lineterminator=self.LINETERMINATOR,
-        )
-        for row in reader:
-            if len(row) == 1:
-                continue
-            yield row
 
 
 @dataclass
