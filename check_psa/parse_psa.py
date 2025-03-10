@@ -24,23 +24,6 @@ class PSAItem(ABC):
         """Generate a unique GUID"""
         return str(uuid4()).upper()
 
-    def to_array(self) -> t.List[str]:
-        """Convert to a list of strings for CSV output"""
-        d = asdict(self)
-        values = []
-        for i in self.get_headers():
-            value = d[i]
-            values.append(value_to_csv(value))
-        return values
-
-    def to_dict(self) -> t.Dict[str, str]:
-        """Convert to a dict for a dataframe"""
-        d = asdict(self)
-        result: t.Dict[str, str] = {}
-        for key in self.get_headers():
-            result[key] = value_to_csv(d[key])
-        return result
-
     @classmethod
     def from_array(cls, fields: t.Sequence[t.Any]):
         """Create a PSAItem from a list of CSV fields"""
@@ -1480,14 +1463,3 @@ def tuple_to_float(t: tuple) -> float:
 
 def find_highest_item(items: t.List[t.Dict[str, t.Any]]) -> int:
     return max((i["height"] for i in items), default=0)
-
-
-def value_to_csv(value: t.Any) -> str:
-    if value is None:
-        return ""
-    if isinstance(value, int):
-        return str(value)
-    if isinstance(value, float):
-        return f"{value:.3f}".rstrip("0").rstrip(".")
-
-    return str(value)
