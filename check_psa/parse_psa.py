@@ -1491,36 +1491,3 @@ def value_to_csv(value: t.Any) -> str:
         return f"{value:.3f}".rstrip("0").rstrip(".")
 
     return str(value)
-
-
-@dataclass
-class Box:
-    """A box in 3D space"""
-
-    x: float
-    y: float
-    z: float
-    width: float
-    height: float
-    depth: float
-
-    def merge(self, other: Box) -> Box:
-        """Merge two boxes into one"""
-        x = min(self.x, other.x)
-        y = min(self.y, other.y)
-        z = min(self.z, other.z)
-        w = max(self.x + self.width, other.x + other.width) - x
-        h = max(self.y + self.height, other.y + other.height) - y
-        d = max(self.z + self.depth, other.z + other.depth) - z
-        return self.__class__(x, y, z, w, h, d)
-
-    def does_overlap(self, other: Box) -> bool:
-        "Check if two boxes overlap."
-        return (
-            self.x < other.x + other.width
-            and self.x + self.width > other.x
-            and self.y < other.y + other.height
-            and self.y + self.height > other.y
-            and self.z < other.z + other.depth
-            and self.z + self.depth > other.z
-        )
