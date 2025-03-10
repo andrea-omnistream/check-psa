@@ -41,10 +41,6 @@ class PSAItem(ABC):
             result[key] = value_to_csv(d[key])
         return result
 
-    def to_csv(self) -> str:
-        """Convert to a CSV line"""
-        return ",".join(self.to_array())
-
     @classmethod
     def from_array(cls, fields: t.Sequence[t.Any]):
         """Create a PSAItem from a list of CSV fields"""
