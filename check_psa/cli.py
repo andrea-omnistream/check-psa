@@ -3,8 +3,8 @@ import sys
 
 import click
 
-from check_psa.parse_psa import PsaParser
 from check_psa.check_sequence import check_sequence
+from check_psa.parse_psa import PsaParser
 
 
 @click.command("check")
@@ -43,10 +43,7 @@ def cli_check(subject: PsaParser, reference: PsaParser, pm, filters):
             sys.exit(1)
 
     if subject and reference:
-        violations = check_sequence(
-            subject.decode_psa(product_master=pm_content),
-            reference.decode_psa(product_master=pm_content),
-        )
+        violations = check_sequence(subject, reference, product_master=pm_content)
         for violation in violations:
             click.echo(violation)
 

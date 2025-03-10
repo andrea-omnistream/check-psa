@@ -11,6 +11,25 @@ from uuid import uuid4
 UNIT_CONVERTER = 10
 
 
+class Pog(t.TypedDict):
+    bays: t.List[Bay]
+
+
+class Bay(t.TypedDict):
+    shelves: t.List[Shelf]
+
+
+class Shelf(t.TypedDict):
+    items: t.List[Item]
+
+
+class Item(t.TypedDict):
+    item_id: str
+    cdt0: t.Optional[str]
+    cdt1: t.Optional[str]
+    cdt2: t.Optional[str]
+
+
 class PSAItem(ABC):
     """Base class for PSA line wrappers"""
 
@@ -237,7 +256,7 @@ class PsaParser:
         notch_no = int((shelf_y + shelf_height - notch_offset) / notch_spacing) + 1
         return max(notch_no, 0)
 
-    def decode_psa(self, product_master={}) -> t.Dict:
+    def decode_psa(self, product_master={}) -> Pog:
         for psa_position, fixture_data in self.position_items:
             product = self.get_product(psa_position.upc)
             prod_x = float(psa_position.x) * UNIT_CONVERTER

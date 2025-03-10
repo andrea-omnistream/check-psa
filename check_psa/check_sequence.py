@@ -1,35 +1,21 @@
 """Check two pogs for consistent sequence"""
 
 from __future__ import annotations
-
-import typing as t
 import itertools as it
 import logging
+import typing as t
+
+from check_psa.parse_psa import Pog, PsaParser
 
 logger = logging.getLogger(__name__)
 
 
-class Pog(t.TypedDict):
-    bays: t.List[Bay]
-
-
-class Bay(t.TypedDict):
-    shelves: t.List[Shelf]
-
-
-class Shelf(t.TypedDict):
-    items: t.List[Item]
-
-
-class Item(t.TypedDict):
-    item_id: str
-    cdt0: str
-    cdt1: str
-    cdt2: str
-
-
-def check_sequence(subject: Pog, reference: Pog) -> t.List[t.Any]:
+def check_sequence(
+    subject_psa: PsaParser, reference_psa: PsaParser, product_master: t.Dict = {}
+) -> t.List[t.Any]:
     "Check subject pog for consistent sequence versus reference"
+    subject = subject_psa.decode_psa(product_master=product_master)
+    reference = reference_psa.decode_psa(product_master=product_master)
     violations = []
     base_left_right = cdt_ordering(reference)
     check_left_right = cdt_ordering(subject)
