@@ -50,8 +50,6 @@ class PSAItem(ABC):
     def from_array(cls, fields: t.Sequence[t.Any]):
         """Create a PSAItem from a list of CSV fields"""
         headers = cls.get_headers()
-        # if len(headers) > len(fields):
-        #     raise PSAItemError(f"Invalid number of fields for {cls.__name__}, got {len(fields)} expected {len(headers)}")
 
         result = cls()
         for key, field in zip(headers, fields):
@@ -71,7 +69,6 @@ class PSAItem(ABC):
                 return int(value)
         except ValueError:
             return 0
-            # raise PSAItemError(f"Invalid value for {self.__class__.__name__}.{key}: {value}: {e}")
 
         if value is None:
             return ""
@@ -2310,41 +2307,6 @@ class PSAFileManager:
             if len(row) == 1:
                 continue
             yield row
-
-    def csv_to_stream(self, lines: t.Iterable[t.Sequence[str]]) -> StringIO:
-        stream = StringIO()
-        csv_writer = csv.writer(
-            stream,
-            delimiter=",",
-            escapechar="\\",
-            quoting=csv.QUOTE_NONE,
-            lineterminator=self.LINETERMINATOR,
-        )
-        for line in lines:
-            csv_writer.writerow(line)
-        return stream
-
-    def to_text(self, lines: t.Iterable[t.Sequence[str]]) -> str:
-        header = self.LINETERMINATOR.join(
-            (
-                "PROSPACE SCHEMATIC FILE",
-                "; Version 2021.1.2",
-                "; Codepage=UTF-8",
-            )
-        )
-        csv_stream = self.csv_to_stream(lines)
-        csv_stream.seek(0)
-        csv_part: str = csv_stream.read()
-        csv_part = csv_part.replace("<newline>", "\\r\\n")
-        return self.LINETERMINATOR.join((header, csv_part))
-
-    def items_to_text(self, items: t.Iterable[PSAItem]) -> str:
-        lines = [
-            list(item.values()) if isinstance(item, dict) else item.to_array()
-            for item in items
-        ]
-
-        return self.to_text(lines)
 
 
 @dataclass
